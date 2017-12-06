@@ -12,7 +12,7 @@ public class PhotoGridActivity extends BaseActivity {
     @NonNull
     @Override
     public Fragment getFragment() {
-        return null;
+        return new PhotoGridFragment();
     }
 
     @Override
