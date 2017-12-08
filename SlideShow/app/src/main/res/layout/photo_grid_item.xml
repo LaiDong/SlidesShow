@@ -9,6 +9,9 @@
         android:id="@+id/photo_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:clickable="true"
+        android:longClickable="true"
+        android:foreground="?attr/selectableItemBackground"
         app:ratio_x="1"
         app:ratio_y="1">
 
@@ -16,7 +19,15 @@
             android:id="@+id/photo_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-           android:scaleType="center"
-            android:clickable="true"/>
+            android:scaleType="center"/>
+
+        <CheckBox
+            android:id="@+id/photo_selector"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:theme="@style/AppTheme.CheckBox"
+            />
     </pl.itto.squarelayout.SquareLayout>
 </RelativeLayout>

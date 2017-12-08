@@ -15,4 +15,9 @@
         <item name="android:background">@color/colorPrimary</item>
         <item name="android:textColor">@color/colorBlack</item>
     </style>
+
+    <style name="AppTheme.CheckBox">
+        <item name="colorAccent">@color/colorPrimary</item>
+        <item name="android:colorAccent">@color/colorPrimary</item>
+    </style>
 </resources>

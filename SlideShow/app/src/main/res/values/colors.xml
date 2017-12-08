@@ -8,4 +8,7 @@
     <color name="colorBlack10">#25000000</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorGrey">#333333</color>
+
+    <!--Toolbar-->
+    <color name="toolbar_text_color">@color/colorWhite</color>
 </resources>

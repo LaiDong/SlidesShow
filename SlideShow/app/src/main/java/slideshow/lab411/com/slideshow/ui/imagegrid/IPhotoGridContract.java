@@ -16,6 +16,8 @@ import slideshow.lab411.com.slideshow.data.model.PhotoFolderInfo;
 public interface IPhotoGridContract {
     interface IPhotoGridView extends IBaseView {
         void updateListPhoto(@NonNull PhotoFolderInfo data);
+
+        void onSelectModeSwitch(boolean enabled);
     }
 
     interface IPhotoGridPresenter<V extends IPhotoGridView> extends IBasePresenter<V> {

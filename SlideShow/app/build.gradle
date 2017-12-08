@@ -41,6 +41,8 @@ dependencies {
     //SquareLayout
     compile(name: 'square_layout', ext: 'aar')
 
+//    //Showcase View
+//    compile 'com.github.amlcurran.showcaseview:library:5.4.3'
 }
 
 //apply plugin: 'com.google.gms.google-services'
