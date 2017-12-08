@@ -3,5 +3,5 @@
     <string name="all_photo">All photos</string>
     <!--Gallery-->
     <string name="gallery_title">Gallery</string>
-
+    <string name="default_file_name">My Recording</string>
 </resources>

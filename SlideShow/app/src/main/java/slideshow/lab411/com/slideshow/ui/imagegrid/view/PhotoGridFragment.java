@@ -1,17 +1,24 @@
 package slideshow.lab411.com.slideshow.ui.imagegrid.view;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -25,6 +32,7 @@ import slideshow.lab411.com.slideshow.data.model.PhotoInfo;
 import slideshow.lab411.com.slideshow.ui.imagegrid.IPhotoGridContract.IPhotoGridPresenter;
 import slideshow.lab411.com.slideshow.ui.imagegrid.IPhotoGridContract.IPhotoGridView;
 import slideshow.lab411.com.slideshow.ui.imagegrid.presenter.PhotoGridPresenter;
+import slideshow.lab411.com.slideshow.ui.imagegrid.service.RecordingService;
 import slideshow.lab411.com.slideshow.ui.widget.PhotoItemDecoration;
 import slideshow.lab411.com.slideshow.utils.MediaUtils;
 import slideshow.lab411.com.slideshow.utils.UiUtils;
@@ -45,6 +53,8 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
 
     IPhotoGridPresenter<IPhotoGridView> mPresenter;
     PhotoGridAdapter mPhotoGridAdapter;
+    private boolean mStartRecording = true;
+    final Handler mHandler = new Handler();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -156,7 +166,21 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
     @OnClick(R.id.fab_slide_show)
     void onfabClick() {
         //start Slide show here
-        showMessage("We will do this action later");
+        //showMessage("We will do this action later");
+        onRecord(mStartRecording);
+
+    }
+
+
+    private void onRecord(boolean start) {
+        final Intent intent = new Intent(getActivity(), RecordingService.class);
+        File folder = new File(Environment.getExternalStorageDirectory() + "/SoundRecorder");
+        if (!folder.exists()) {
+            //folder /SoundRecorder doesn't exist, create the folder
+            folder.mkdir();
+        }
+        getActivity().startService(intent);
+
     }
 
 }
