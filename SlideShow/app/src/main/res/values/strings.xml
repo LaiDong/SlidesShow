@@ -9,4 +9,5 @@
     <!--Gallery.Toolbar-->
     <string name="toolbar_item_select">(%d/%d)</string>
 
+    <string name="default_file_name">My Recording</string>
 </resources>
