@@ -8,6 +8,8 @@
 
     <!--Gallery.Toolbar-->
     <string name="toolbar_item_select">(%d/%d)</string>
-
     <string name="default_file_name">My Recording</string>
+
+    <!--ShowPhoto-->
+    <string name="photo_slide_show">Start slide show</string>
 </resources>

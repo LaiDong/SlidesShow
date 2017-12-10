@@ -19,7 +19,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,7 +36,9 @@ import slideshow.lab411.com.slideshow.ui.imagegrid.IPhotoGridContract.IPhotoGrid
 import slideshow.lab411.com.slideshow.ui.imagegrid.IPhotoGridContract.IPhotoGridView;
 import slideshow.lab411.com.slideshow.ui.imagegrid.presenter.PhotoGridPresenter;
 import slideshow.lab411.com.slideshow.ui.imagegrid.service.RecordingService;
+import slideshow.lab411.com.slideshow.ui.showphoto.view.ShowPhotoActivity;
 import slideshow.lab411.com.slideshow.ui.widget.PhotoItemDecoration;
+import slideshow.lab411.com.slideshow.utils.AppConstants;
 import slideshow.lab411.com.slideshow.utils.UiUtils;
 
 /**
@@ -127,6 +131,14 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
 
     }
 
+    @Override
+    public void showPhoto(@NonNull List<PhotoInfo> data, int position) {
+        Intent intent = new Intent(getContext(), ShowPhotoActivity.class);
+        intent.putExtra(AppConstants.ShowPhoto.EXTRA_PHOTO_LIST, (Serializable) data);
+        intent.putExtra(AppConstants.ShowPhoto.EXTRA_PHOTO_POSITION, position);
+        startActivity(intent);
+    }
+
     class PhotoGridAdapter extends RecyclerView.Adapter<PhotoGridAdapter.PhotoHolder> {
         PhotoFolderInfo mPhotoList = null;
         boolean[] mSelectList;
@@ -138,6 +150,10 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
             mSelectList = new boolean[0];
             mSelectMode = false;
             mSelectedPhoto = new LinkedHashMap<>();
+        }
+
+        public List<PhotoInfo> getListPhoto() {
+            return mPhotoList.getPhotoList();
         }
 
         public void replaceData(@NonNull PhotoFolderInfo data) {
@@ -207,6 +223,15 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
                         selectPhoto(info);
                         mSelector.setChecked(true);
                     }
+                } else {
+                    //Open Image in single activity
+                    if (mPhotoList != null) {
+                        List<PhotoInfo> list = mPhotoList.getPhotoList();
+                        if (list != null && list.size() > 0) {
+                            showPhoto(list, getAdapterPosition());
+                        }
+                    }
+
                 }
             }
 
@@ -218,6 +243,7 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
                     mSelectMode = true;
                     selectPhoto(info);
                     notifyDataSetChanged();
+                    onSelectModeSwitch(true);
                 }
                 return true;
             }

@@ -14,4 +14,7 @@
     <dimen name="toolbar_padding_horizontal">10dp</dimen>
     <dimen name="toolbar_option_icon_size">30dp</dimen>
 
+    <!--ShowPhoto.Toolbar-->
+    <dimen name="photo_toolbar_title_text_size">18dp</dimen>
+    <dimen name="photo_toolbar_subtitle_text_size">14dp</dimen>
 </resources>

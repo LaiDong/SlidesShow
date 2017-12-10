@@ -1,6 +1,7 @@
 package slideshow.lab411.com.slideshow.base;
 
 import android.content.Context;
+import android.support.annotation.ColorRes;
 import android.support.v4.app.Fragment;
 
 import butterknife.Unbinder;
@@ -65,4 +66,7 @@ public class BaseFragment extends Fragment implements IBaseView {
         return (BaseActivity) getActivity();
     }
 
+    public void setStatusColor(@ColorRes int color) {
+        getParentActivity().setStatusColor(color);
+    }
 }
