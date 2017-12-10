@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -33,8 +34,9 @@ public class MediaUtils {
                 MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
                 MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.DATE_TAKEN,
-                MediaStore.Images.Media.ORIENTATION,
-                MediaStore.Images.Thumbnails.DATA
+//                MediaStore.Images.Media.ORIENTATION,
+//                MediaStore.Images.Thumbnails.DATA,
+                MediaStore.Images.Media.DATE_TAKEN
         };
 
         final ArrayList<PhotoFolderInfo> allPhotoFolderList = new ArrayList<>();
@@ -52,6 +54,7 @@ public class MediaUtils {
             cursor = MediaStore.Images.Media.query(context.getContentResolver(), MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projectionPhotos, "", null, MediaStore.Images.Media.DATE_TAKEN + " DESC");
             int bucketNameColumn = cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
             final int bucketIdColumn = cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID);
+            int dateCollumn = cursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN);
             while (cursor.moveToNext()) {
                 int bucketId = cursor.getInt(bucketIdColumn);
                 String bucketName = cursor.getString(bucketNameColumn);
@@ -59,11 +62,14 @@ public class MediaUtils {
                 final int imageIdColuumn = cursor.getColumnIndex(MediaStore.Images.Media._ID);
                 final int imageId = cursor.getInt(imageIdColuumn);
                 final String path = cursor.getString(dataCollumn);
+                final int date = cursor.getInt(dateCollumn);
+                Date date1 = new Date(date);
                 Log.i(TAG, "Image: " + "ID:" + imageId + " - PATH: " + path);
                 File file = new File(path);
                 final PhotoInfo photoInfo = new PhotoInfo();
                 photoInfo.setPhotoId(imageId);
                 photoInfo.setPhotoPath(path);
+                photoInfo.setDate(date1);
                 if (allPhotoFolderInfo.getCoverPhoto() == null) {
                     allPhotoFolderInfo.setCoverPhoto(photoInfo);
                 }

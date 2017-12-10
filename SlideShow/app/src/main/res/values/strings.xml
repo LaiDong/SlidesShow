@@ -1,7 +1,15 @@
 <resources>
     <string name="app_name">SlideShow</string>
     <string name="all_photo">All photos</string>
+
+
     <!--Gallery-->
     <string name="gallery_title">Gallery</string>
+
+    <!--Gallery.Toolbar-->
+    <string name="toolbar_item_select">(%d/%d)</string>
     <string name="default_file_name">My Recording</string>
+
+    <!--ShowPhoto-->
+    <string name="photo_slide_show">Start slide show</string>
 </resources>
