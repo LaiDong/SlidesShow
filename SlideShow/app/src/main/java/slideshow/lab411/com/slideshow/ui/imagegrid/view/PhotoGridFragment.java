@@ -279,8 +279,7 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
     @OnClick(R.id.fab_slide_show)
     void onfabClick() {
         //start Slide show here
-        //showMessage("We will do this action later");
-        onRecord(mStartRecording);
+       // onRecord(mStartRecording);
 
     }
 
