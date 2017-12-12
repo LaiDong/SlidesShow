@@ -31,7 +31,6 @@ import slideshow.lab411.com.slideshow.ui.imagegrid.service.RecordingService;
 import slideshow.lab411.com.slideshow.ui.showphoto.IShowPhotoContract.IShowPhotoPresenter;
 import slideshow.lab411.com.slideshow.ui.showphoto.IShowPhotoContract.IShowPhotoView;
 import slideshow.lab411.com.slideshow.ui.showphoto.presenter.ShowPhotoPresenter;
-import slideshow.lab411.com.slideshow.utils.AppConstants;
 import slideshow.lab411.com.slideshow.utils.AppConstants.ShowPhoto;
 import slideshow.lab411.com.slideshow.utils.UiUtils;
 
@@ -182,30 +181,30 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
         }
     }
 
-    TimerTask mSlideShowTask = new TimerTask() {
-        @Override
-        public void run() {
-            getParentActivity().runOnUiThread(new TimerTask() {
-                @Override
-                public void run() {
-                    if (mAdapter != null) {
-                        int count = mAdapter.getCount();
-                        if (count > 0) {
-                            int currentPosition = mPhotoPager.getCurrentItem();
-                            if (currentPosition < count - 1) {
-                                currentPosition++;
-                            } else {
-                                currentPosition = 0;
-                            }
-                            mPhotoPager.setCurrentItem(currentPosition);
+
+TimerTask mSlideShowTask = new TimerTask() {
+    @Override
+    public void run() {
+        getParentActivity().runOnUiThread(new TimerTask() {
+            @Override
+            public void run() {
+                if (mAdapter != null) {
+                    int count = mAdapter.getCount();
+                    if (count > 0) {
+                        int currentPosition = mPhotoPager.getCurrentItem();
+                        if (currentPosition < count - 1) {
+                            currentPosition++;
+                        } else {
+                            currentPosition = 0;
                         }
+                        mPhotoPager.setCurrentItem(currentPosition);
                     }
                 }
-            });
+            }
+        });
 
-        }
-    };
-
+    }
+};
     @Override
     public void stopSlideShow() {
         if (mSlideShowTask != null) {
