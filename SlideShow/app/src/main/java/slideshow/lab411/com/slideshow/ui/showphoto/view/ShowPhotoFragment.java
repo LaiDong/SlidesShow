@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,6 +31,7 @@ import slideshow.lab411.com.slideshow.ui.imagegrid.service.RecordingService;
 import slideshow.lab411.com.slideshow.ui.showphoto.IShowPhotoContract.IShowPhotoPresenter;
 import slideshow.lab411.com.slideshow.ui.showphoto.IShowPhotoContract.IShowPhotoView;
 import slideshow.lab411.com.slideshow.ui.showphoto.presenter.ShowPhotoPresenter;
+import slideshow.lab411.com.slideshow.utils.AppConstants.ShowPhoto;
 import slideshow.lab411.com.slideshow.utils.UiUtils;
 
 /**
@@ -52,7 +54,6 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
     MenuItem mSlideShowItem;
     ShowPhotoAdapter mAdapter;
     Timer mTimer = null;
-    TimerTask mSlideShowTask = null;
 
     public static ShowPhotoFragment newInstance(List<PhotoInfo> data, int pos) {
         ShowPhotoFragment fragment = new ShowPhotoFragment();
@@ -60,10 +61,12 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
         fragment.mCurrentPosition = pos;
         return fragment;
     }
+    private int mMode = ShowPhoto.MODE_NORMAL;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: ");
         setHasOptionsMenu(true);
         setupData();
     }
@@ -71,6 +74,7 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: ");
         View view = inflater.inflate(R.layout.frag_show_photo, container, false);
         setUnBinder(ButterKnife.bind(this, view));
         setupActionBar();
@@ -79,23 +83,39 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
     }
 
     void setupData() {
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            mMode = bundle.getInt(ShowPhoto.EXTRA_MODE_SHOW, ShowPhoto.MODE_NORMAL);
+            mPhotoInfoList = (List<PhotoInfo>) bundle.getSerializable(ShowPhoto.EXTRA_PHOTO_LIST);
+            if (mMode == ShowPhoto.MODE_NORMAL)
+                mCurrentPosition = bundle.getInt(ShowPhoto.EXTRA_PHOTO_POSITION, 0);
+        }
         mPresenter = new ShowPhotoPresenter<>();
         mPresenter.onAttach(this);
-        mAdapter = new ShowPhotoAdapter(mPhotoInfoList);
+        if (mPhotoInfoList != null)
+            mAdapter = new ShowPhotoAdapter(mPhotoInfoList);
+        else mAdapter = new ShowPhotoAdapter(new ArrayList<PhotoInfo>());
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onViewCreated: ");
         super.onViewCreated(view, savedInstanceState);
-        if (mCurrentPosition != -1) {
-            mPhotoPager.setCurrentItem(mCurrentPosition);
+        if (mMode == ShowPhoto.MODE_NORMAL) {
+            if (mCurrentPosition != -1 && mAdapter != null && mAdapter.getCount() > 0) {
+                mPhotoPager.setCurrentItem(mCurrentPosition);
+            }
         }
+
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        Log.d(TAG, "onCreateOptionsMenu: ");
         inflater.inflate(R.menu.menu, menu);
         mSlideShowItem = menu.findItem(R.id.action_slide);
+        if (mMode == ShowPhoto.MODE_SLIDE)
+            startSlideShow();
     }
 
     void setupView() {
@@ -138,6 +158,7 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy: ");
         if (mPresenter != null)
             mPresenter.onDetach();
         stopSlideShow();
@@ -155,33 +176,34 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
         if (mAdapter != null && mAdapter.getCount() > 0) {
             mSlideShowItem.setIcon(R.drawable.ic_stop);
             mTimer = new Timer();
-            mSlideShowTask = new TimerTask() {
-                @Override
-                public void run() {
-                    getParentActivity().runOnUiThread(new TimerTask() {
-                        @Override
-                        public void run() {
-                            if (mAdapter != null) {
-                                int count = mAdapter.getCount();
-                                if (count > 0) {
-                                    int currentPosition = mPhotoPager.getCurrentItem();
-                                    if (currentPosition < count - 1) {
-                                        currentPosition++;
-                                    } else {
-                                        currentPosition = 0;
-                                    }
-                                    mPhotoPager.setCurrentItem(currentPosition);
-                                }
-                            }
-                        }
-                    });
 
-                }
-            };
-            mTimer.scheduleAtFixedRate(mSlideShowTask, 5*1000, 2000);
+            mTimer.scheduleAtFixedRate(mSlideShowTask, 2*1000, 2000);
+//            mTimer.schedule(mSlideShowTask, 2000, 2000);
         }
     }
+TimerTask mSlideShowTask = new TimerTask() {
+    @Override
+    public void run() {
+        getParentActivity().runOnUiThread(new TimerTask() {
+            @Override
+            public void run() {
+                if (mAdapter != null) {
+                    int count = mAdapter.getCount();
+                    if (count > 0) {
+                        int currentPosition = mPhotoPager.getCurrentItem();
+                        if (currentPosition < count - 1) {
+                            currentPosition++;
+                        } else {
+                            currentPosition = 0;
+                        }
+                        mPhotoPager.setCurrentItem(currentPosition);
+                    }
+                }
+            }
+        });
 
+    }
+};
     @Override
     public void stopSlideShow() {
         if (mSlideShowTask != null) {
@@ -207,13 +229,17 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
             return null;
         }
 
+
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             Log.d(TAG, "instantiateItem: " + position);
             View view = mInflater.inflate(R.layout.show_photo_item, container, false);
             ImageView img = view.findViewById(R.id.photo_item);
             PhotoInfo info = mList.get(position);
-            UiUtils.loadImageFromFile(getContext(), info.getPhotoPath(), img);
+            if (info.isResImage())
+                UiUtils.loadImageRes(getContext(), info.getResImageId(), img);
+            else
+                UiUtils.loadImageFromFile(getContext(), info.getPhotoPath(), img);
             container.addView(view, 0);
             return view;
         }
