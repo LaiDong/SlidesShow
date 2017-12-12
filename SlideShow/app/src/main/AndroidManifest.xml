@@ -25,8 +25,13 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.showphoto.view.ShowPhotoActivity"
+        <activity
+            android:name=".ui.showphoto.view.ShowPhotoActivity"
             android:theme="@style/AppTheme.WhiteStatus"
+            />
+        <activity
+            android:name=".ui.selectphoto.view.PhotoSelectActivity"
+            android:label="@string/select_title"
             />
 
         <service android:name=".ui.imagegrid.service.RecordingService"/>

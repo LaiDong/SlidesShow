@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -26,15 +27,18 @@ import slideshow.lab411.com.slideshow.R;
 
 public class UiUtils {
     public static void loadImageRes(Context context, @StringRes int resId, final ImageView view) {
-//        final RequestOptions requestOptions = new RequestOptions();
+        final RequestOptions requestOptions = new RequestOptions();
 //        requestOptions.placeholder(R.mipmap.ic_launcher);
 //        requestOptions.centerInside();
 //        requestOptions.override(view.getWidth(), view.getHeight());
-        Glide.with(context).asBitmap().load(resId).into(view);
+        requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
+        Glide.with(context).asBitmap().load(resId).apply(requestOptions).into(view);
     }
 
     public static void loadImageFromFile(Context context, String filepath, ImageView view) {
-        Glide.with(context).load(new File(filepath)).into(view);
+        final RequestOptions requestOptions = new RequestOptions();
+        requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
+        Glide.with(context).load(new File(filepath)).apply(requestOptions).into(view);
     }
 
 }

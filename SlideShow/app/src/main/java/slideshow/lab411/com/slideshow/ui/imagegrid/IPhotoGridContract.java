@@ -15,15 +15,21 @@ import slideshow.lab411.com.slideshow.data.model.PhotoInfo;
  */
 
 public interface IPhotoGridContract {
+    /* Main Photo Grid */
     interface IPhotoGridView extends IBaseView {
-        void updateListPhoto(@NonNull PhotoFolderInfo data);
+        void updateListPhoto(@NonNull List<PhotoInfo> data);
 
         void onSelectModeSwitch(boolean enabled);
 
         void showPhoto(@NonNull List<PhotoInfo> data, int position);
+
+        void openGallery();
+
+        void openSlideShow();
     }
 
     interface IPhotoGridPresenter<V extends IPhotoGridView> extends IBasePresenter<V> {
-        void loadImage(Context context);
+        void initDefaultPhoto();
     }
+
 }
