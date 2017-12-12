@@ -52,4 +52,16 @@ public class PhotoFolderInfo {
     public void setPhotoList(List<PhotoInfo> photoList) {
         this.photoList = photoList;
     }
+
+    public int getPhotoCount() {
+        return photoList.size();
+    }
+
+    public PhotoInfo getPhoto(int pos) {
+        return photoList.get(pos);
+    }
+
+    public void addPhoto(PhotoInfo info) {
+        photoList.add(info);
+    }
 }

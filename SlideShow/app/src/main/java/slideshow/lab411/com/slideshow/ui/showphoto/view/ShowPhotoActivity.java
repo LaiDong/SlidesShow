@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
 import java.util.List;
 
@@ -22,9 +23,13 @@ public class ShowPhotoActivity extends BaseActivity {
     @NonNull
     @Override
     public Fragment getFragment() {
-        List<PhotoInfo> list = (List<PhotoInfo>) getIntent().getSerializableExtra(AppConstants.ShowPhoto.EXTRA_PHOTO_LIST);
-        int pos = getIntent().getIntExtra(AppConstants.ShowPhoto.EXTRA_PHOTO_POSITION, -1);
-        return ShowPhotoFragment.newInstance(list, pos);
+
+        ShowPhotoFragment fragment = new ShowPhotoFragment();
+        fragment.setArguments(getIntent().getExtras());
+
+        List<PhotoInfo> list = (List<PhotoInfo>) getIntent().getExtras().getSerializable(AppConstants.ShowPhoto.EXTRA_PHOTO_LIST);
+        Log.d(TAG, "getFragment: " + list.size());
+        return fragment;
     }
 
     @Override

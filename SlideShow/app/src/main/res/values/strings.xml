@@ -1,15 +1,20 @@
 <resources>
     <string name="app_name">SlideShow</string>
     <string name="all_photo">All photos</string>
+    <string name="done">Done</string>
 
 
     <!--Gallery-->
     <string name="gallery_title">Gallery</string>
-
+    <string name="action_add_more">Add more from Gallery</string>
     <!--Gallery.Toolbar-->
     <string name="toolbar_item_select">(%d/%d)</string>
     <string name="default_file_name">My Recording</string>
 
     <!--ShowPhoto-->
     <string name="photo_slide_show">Start slide show</string>
+
+
+    <!--PhotoSelect-->
+    <string name="select_title">Select Photo</string>
 </resources>

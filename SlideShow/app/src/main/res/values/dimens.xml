@@ -17,4 +17,8 @@
     <!--ShowPhoto.Toolbar-->
     <dimen name="photo_toolbar_title_text_size">18dp</dimen>
     <dimen name="photo_toolbar_subtitle_text_size">14dp</dimen>
+
+    <!--PhotoSelect-->
+    <dimen name="select_done_text_size">14dp</dimen>
+    <dimen name="select_photo_item_margin">1dp</dimen>
 </resources>

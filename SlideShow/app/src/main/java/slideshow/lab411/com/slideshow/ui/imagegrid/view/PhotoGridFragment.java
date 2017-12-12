@@ -1,5 +1,6 @@
 package slideshow.lab411.com.slideshow.ui.imagegrid.view;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -9,36 +10,37 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.OnLongClick;
 import pl.itto.squarelayout.SquareLayout;
 import slideshow.lab411.com.slideshow.R;
 import slideshow.lab411.com.slideshow.base.BaseFragment;
-import slideshow.lab411.com.slideshow.data.model.PhotoFolderInfo;
 import slideshow.lab411.com.slideshow.data.model.PhotoInfo;
 import slideshow.lab411.com.slideshow.ui.imagegrid.IPhotoGridContract.IPhotoGridPresenter;
 import slideshow.lab411.com.slideshow.ui.imagegrid.IPhotoGridContract.IPhotoGridView;
 import slideshow.lab411.com.slideshow.ui.imagegrid.presenter.PhotoGridPresenter;
 import slideshow.lab411.com.slideshow.ui.imagegrid.service.RecordingService;
+import slideshow.lab411.com.slideshow.ui.selectphoto.view.PhotoSelectActivity;
 import slideshow.lab411.com.slideshow.ui.showphoto.view.ShowPhotoActivity;
 import slideshow.lab411.com.slideshow.ui.widget.PhotoItemDecoration;
 import slideshow.lab411.com.slideshow.utils.AppConstants;
+import slideshow.lab411.com.slideshow.utils.AppConstants.ShowPhoto;
 import slideshow.lab411.com.slideshow.utils.UiUtils;
 
 /**
@@ -47,18 +49,16 @@ import slideshow.lab411.com.slideshow.utils.UiUtils;
 
 public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
     private static final String TAG = "Lab411." + PhotoGridFragment.class.getSimpleName();
-    private static final int mImageList[] = {R.drawable.img1, R.drawable.img2, R.drawable.img3, R.drawable.img4, R.drawable.img5, R.drawable.img6, R.drawable.img7
-            , R.drawable.img8, R.drawable.img9, R.drawable.img10, R.drawable.img11, R.drawable.img12, R.drawable.img13, R.drawable.img14, R.drawable.img15,
-            R.drawable.img16, R.drawable.img17, R.drawable.img18, R.drawable.img19, R.drawable.img20};
 
     /**
      * Init Views
      */
     /* Toolbar */
     @BindView(R.id.toolbar)
-    RelativeLayout mToolbar;
-    @BindView(R.id.gallery_title)
-    TextView mToolbarTitle;
+    Toolbar mToolbar;
+//    RelativeLayout mToolbar;
+//    @BindView(R.id.gallery_title)
+//    TextView mToolbarTitle;
 
 
     @BindView(R.id.photo_grid)
@@ -89,7 +89,24 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mPresenter.loadImage(getContext());
+        if (mPresenter != null)
+            mPresenter.initDefaultPhoto();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.photo_grid_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add_photo:
+                openGallery();
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     void setup() {
@@ -105,10 +122,10 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
     }
 
     void setupActionBar() {
-//        getParentActivity().setSupportActionBar(mToolbar);
+        getParentActivity().setSupportActionBar(mToolbar);
 //        getParentActivity().getSupportActionBar().setDisplayShowHomeEnabled(true);
 //        getParentActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mToolbarTitle.setText(getParentActivity().getTitle());
+//        mToolbarTitle.setText(getParentActivity().getTitle());
     }
 
     @Override
@@ -120,8 +137,9 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
     }
 
     @Override
-    public void updateListPhoto(@NonNull PhotoFolderInfo data) {
+    public void updateListPhoto(@NonNull List<PhotoInfo> data) {
         if (mPhotoGridAdapter != null) {
+            Log.d(TAG, "updateListPhoto: "+data.size());
             mPhotoGridAdapter.replaceData(data);
         }
     }
@@ -134,31 +152,50 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
     @Override
     public void showPhoto(@NonNull List<PhotoInfo> data, int position) {
         Intent intent = new Intent(getContext(), ShowPhotoActivity.class);
-        intent.putExtra(AppConstants.ShowPhoto.EXTRA_PHOTO_LIST, (Serializable) data);
-        intent.putExtra(AppConstants.ShowPhoto.EXTRA_PHOTO_POSITION, position);
+        intent.putExtra(ShowPhoto.EXTRA_PHOTO_LIST, (Serializable) data);
+        intent.putExtra(ShowPhoto.EXTRA_PHOTO_POSITION, position);
         startActivity(intent);
     }
 
+    @Override
+    public void openGallery() {
+        Intent intent = new Intent(getContext(), PhotoSelectActivity.class);
+        startActivityForResult(intent, AppConstants.PhotoGrid.REQUEST_PHOTO);
+    }
+
+    @Override
+    public void openSlideShow() {
+        if (mPhotoGridAdapter != null) {
+            List<PhotoInfo> dataList = mPhotoGridAdapter.getDataList();
+            if (dataList != null && dataList.size() > 0) {
+                Intent intent = new Intent(getContext(), ShowPhotoActivity.class);
+                intent.putExtra(ShowPhoto.EXTRA_MODE_SHOW, ShowPhoto.MODE_SLIDE);
+                intent.putExtra(ShowPhoto.EXTRA_PHOTO_LIST, (Serializable) dataList);
+                startActivity(intent);
+            } else {
+//                showMessage();
+            }
+
+        }
+    }
+
     class PhotoGridAdapter extends RecyclerView.Adapter<PhotoGridAdapter.PhotoHolder> {
-        PhotoFolderInfo mPhotoList = null;
-        boolean[] mSelectList;
-        LinkedHashMap<String, PhotoInfo> mSelectedPhoto;
+        List<PhotoInfo> mDataList;
         boolean mSelectMode = false;
 
         public PhotoGridAdapter() {
-            mPhotoList = new PhotoFolderInfo();
-            mSelectList = new boolean[0];
+            mDataList = new ArrayList<>();
             mSelectMode = false;
-            mSelectedPhoto = new LinkedHashMap<>();
         }
 
-        public List<PhotoInfo> getListPhoto() {
-            return mPhotoList.getPhotoList();
+
+        public void replaceData(@NonNull List<PhotoInfo> data) {
+            mDataList = data;
+            notifyDataSetChanged();
         }
 
-        public void replaceData(@NonNull PhotoFolderInfo data) {
-            mPhotoList = data;
-            mSelectList = new boolean[mPhotoList.getPhotoList().size()];
+        public void addData(List<PhotoInfo> list) {
+            mDataList.addAll(list);
             notifyDataSetChanged();
         }
 
@@ -171,7 +208,7 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
 
         @Override
         public void onBindViewHolder(PhotoHolder holder, int position) {
-            PhotoInfo item = mPhotoList.getPhotoList().get(position);
+            PhotoInfo item = mDataList.get(position);
             if (item != null) {
                 holder.bindItem(item);
             }
@@ -179,7 +216,13 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
 
         @Override
         public int getItemCount() {
-            return mPhotoList.getPhotoList().size();
+            int count = mDataList.size();
+            Log.d(TAG, "getItemCount: " + count);
+            return count;
+        }
+
+        public List<PhotoInfo> getDataList() {
+            return mDataList;
         }
 
         class PhotoHolder extends RecyclerView.ViewHolder {
@@ -188,8 +231,6 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
 
             @BindView(R.id.photo_view)
             ImageView mImg;
-            @BindView(R.id.photo_selector)
-            CheckBox mSelector;
 
             public PhotoHolder(View itemView) {
                 super(itemView);
@@ -197,90 +238,35 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
             }
 
             void bindItem(PhotoInfo item) {
-                if (mSelectMode) {
-                    mSelector.setVisibility(View.VISIBLE);
-                    String imagePath = item.getPhotoPath();
-                    if (mSelectedPhoto.containsKey(imagePath))
-                        mSelector.setChecked(true);
-                    else
-                        mSelector.setChecked(false);
-                } else {
-                    mSelector.setVisibility(View.GONE);
-                }
-                UiUtils.loadImageFromFile(getContext(), item.getPhotoPath(), mImg);
+                Log.d(TAG, "bindItem: "+getAdapterPosition());
+                if (item.isResImage()) {
+                    UiUtils.loadImageRes(getContext(), item.getResImageId(), mImg);
+                } else
+                    UiUtils.loadImageFromFile(getContext(), item.getPhotoPath(), mImg);
             }
 
             @OnClick(R.id.photo_layout)
             void onClick() {
                 if (mSelectMode) {
-                    PhotoInfo info = mPhotoList.getPhotoList().get(getAdapterPosition());
-                    Log.d(TAG, "onClick: " + getAdapterPosition() + " : " + info.getPhotoPath());
-                    if (isPhotoSelect(info)) {
-                        //deselect
-                        unSelectPhoto(info);
-                        mSelector.setChecked(false);
-                    } else {
-                        selectPhoto(info);
-                        mSelector.setChecked(true);
-                    }
+                    PhotoInfo info = mDataList.get(getAdapterPosition());
                 } else {
                     //Open Image in single activity
-                    if (mPhotoList != null) {
-                        List<PhotoInfo> list = mPhotoList.getPhotoList();
-                        if (list != null && list.size() > 0) {
-                            showPhoto(list, getAdapterPosition());
-                        }
+                    if (mDataList != null && mDataList.size() > 0) {
+                        showPhoto(mDataList, getAdapterPosition());
                     }
 
                 }
             }
 
 
-            @OnLongClick(R.id.photo_layout)
-            boolean onLongClick() {
-                if (!mSelectMode) {
-                    PhotoInfo info = mPhotoList.getPhotoList().get(getAdapterPosition());
-                    mSelectMode = true;
-                    selectPhoto(info);
-                    notifyDataSetChanged();
-                    onSelectModeSwitch(true);
-                }
-                return true;
-            }
-
-            public boolean isPhotoSelect(PhotoInfo info) {
-                if (mSelectedPhoto.containsKey(info.getPhotoPath())) return true;
-                return false;
-            }
-
-            public void unSelectPhoto(PhotoInfo info) {
-                mSelectedPhoto.remove(info.getPhotoPath());
-            }
-
-            public void selectPhoto(PhotoInfo info) {
-                mSelectedPhoto.put(info.getPhotoPath(), info);
-            }
-
-        }
-
-        public void clearSelected() {
-            mSelectedPhoto.clear();
-        }
-
-        public void selectAllPhoto() {
-            for (PhotoInfo info : mPhotoList.getPhotoList()) {
-                String path = info.getPhotoPath();
-                if (!mSelectedPhoto.containsKey(path))
-                    mSelectedPhoto.put(path, info);
-            }
         }
     }
 
     @OnClick(R.id.fab_slide_show)
     void onfabClick() {
         //start Slide show here
-       // onRecord(mStartRecording);
-
+        openSlideShow();
+        onRecord(mStartRecording);
     }
 
 
@@ -292,6 +278,19 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
             folder.mkdir();
         }
         getActivity().startService(intent);
+    }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case AppConstants.PhotoGrid.REQUEST_PHOTO:
+                    List<PhotoInfo> list = (List<PhotoInfo>) data.getSerializableExtra(AppConstants.PhotoSelect.EXTRA_PHOTO_RESULT);
+                    if (list != null && list.size() > 0 && mPhotoGridAdapter != null) {
+                        mPhotoGridAdapter.addData(list);
+                    }
+                    break;
+            }
+        }
     }
 }
