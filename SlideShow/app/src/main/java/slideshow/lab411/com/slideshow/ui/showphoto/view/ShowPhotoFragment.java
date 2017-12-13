@@ -1,6 +1,8 @@
 package slideshow.lab411.com.slideshow.ui.showphoto.view;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -14,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -24,6 +27,7 @@ import butterknife.ButterKnife;
 import slideshow.lab411.com.slideshow.R;
 import slideshow.lab411.com.slideshow.base.BaseFragment;
 import slideshow.lab411.com.slideshow.data.model.PhotoInfo;
+import slideshow.lab411.com.slideshow.ui.imagegrid.service.RecordingService;
 import slideshow.lab411.com.slideshow.ui.showphoto.IShowPhotoContract.IShowPhotoPresenter;
 import slideshow.lab411.com.slideshow.ui.showphoto.IShowPhotoContract.IShowPhotoView;
 import slideshow.lab411.com.slideshow.ui.showphoto.presenter.ShowPhotoPresenter;
@@ -52,6 +56,7 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
     ShowPhotoAdapter mAdapter;
     Timer mTimer = null;
     private int mMode = ShowPhoto.MODE_NORMAL;
+    TimerTask mSlideShowTask = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -166,16 +171,39 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
         if (mAdapter != null && mAdapter.getCount() > 0) {
             mSlideShowItem.setIcon(R.drawable.ic_stop);
             mTimer = new Timer();
-            mTimer.schedule(mSlideShowTask, 2000, 2000);
+            mSlideShowTask = new TimerTask() {
+                @Override
+                public void run() {
+                    getParentActivity().runOnUiThread(new TimerTask() {
+                        @Override
+                        public void run() {
+                            if (mAdapter != null) {
+                                int count = mAdapter.getCount();
+                                if (count > 0) {
+                                    int currentPosition = mPhotoPager.getCurrentItem();
+                                    if (currentPosition < count - 1) {
+                                        currentPosition++;
+                                    } else {
+                                        currentPosition = 0;
+                                    }
+                                    mPhotoPager.setCurrentItem(currentPosition);
+                                }
+                            }
+                        }
+                    });
+
+                }
+            };
+            mTimer.schedule(mSlideShowTask, 3000, 2000);
         }
     }
 
     @Override
     public void stopSlideShow() {
-        if (mTimer != null) {
+        if (mSlideShowTask != null) {
             mSlideShowItem.setIcon(R.drawable.ic_slideshow_dark);
-            mTimer.cancel();
-            mTimer = null;
+            mSlideShowTask.cancel();
+            mSlideShowTask = null;
         }
     }
 
@@ -235,37 +263,30 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
                 getParentActivity().onBackPressed();
                 return true;
             case R.id.action_slide:
-                if (mTimer != null) {
+                if (mSlideShowTask != null) {
                     stopSlideShow();
+                    onRecord(false);
                 } else {
                     startSlideShow();
+                    onRecord(true);
                 }
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    TimerTask mSlideShowTask = new TimerTask() {
-        @Override
-        public void run() {
-            getParentActivity().runOnUiThread(new TimerTask() {
-                @Override
-                public void run() {
-                    if (mAdapter != null) {
-                        int count = mAdapter.getCount();
-                        if (count > 0) {
-                            int currentPosition = mPhotoPager.getCurrentItem();
-                            if (currentPosition < count - 1) {
-                                currentPosition++;
-                            } else {
-                                currentPosition = 0;
-                            }
-                            mPhotoPager.setCurrentItem(currentPosition);
-                        }
-                    }
-                }
-            });
-
+    private void onRecord(boolean start) {
+        final Intent intent = new Intent(getActivity(), RecordingService.class);
+        if (start) {
+            File folder = new File(Environment.getExternalStorageDirectory() + "/SlideShow");
+            if (!folder.exists()) {
+                //folder /SlideShow doesn't exist, create the folder
+                folder.mkdir();
+            }
+            getActivity().startService(intent);
+        } else {
+            getActivity().stopService(intent);
         }
-    };
+    }
+
 }

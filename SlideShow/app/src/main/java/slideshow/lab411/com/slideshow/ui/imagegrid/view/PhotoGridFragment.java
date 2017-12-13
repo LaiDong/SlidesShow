@@ -66,8 +66,6 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
 
     IPhotoGridPresenter<IPhotoGridView> mPresenter;
     PhotoGridAdapter mPhotoGridAdapter;
-    private boolean mStartRecording = true;
-    final Handler mHandler = new Handler();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -267,15 +265,15 @@ public class PhotoGridFragment extends BaseFragment implements IPhotoGridView {
         //start Slide show here
         //showMessage("We will do this action later");
         openSlideShow();
-        onRecord(mStartRecording);
+        onRecord();
     }
 
 
-    private void onRecord(boolean start) {
+    private void onRecord() {
         final Intent intent = new Intent(getActivity(), RecordingService.class);
-        File folder = new File(Environment.getExternalStorageDirectory() + "/SoundRecorder");
+        File folder = new File(Environment.getExternalStorageDirectory() + "/SlideShow");
         if (!folder.exists()) {
-            //folder /SoundRecorder doesn't exist, create the folder
+            //folder /SlideShow doesn't exist, create the folder
             folder.mkdir();
         }
         getActivity().startService(intent);

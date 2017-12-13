@@ -48,7 +48,6 @@ public class RecordingService extends Service {
 
     private Timer mTimer = null;
     private TimerTask mIncrementTimerTask = null;
-    private boolean mStartRecording = true;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -75,9 +74,9 @@ public class RecordingService extends Service {
 
     @Override
     public void onDestroy() {
-       /* if (mRecorder != null) {
+        if (mRecorder != null) {
             stopRecording();
-        }*/
+        }
 
         super.onDestroy();
     }
@@ -116,18 +115,20 @@ public class RecordingService extends Service {
             count++;
 
             mFileName = getString(R.string.default_file_name)
-                    + " #" + (mDatabase.getCount() + count) + ".mp3";
+                    + " #" + count + ".mp3";
             mFilePath = Environment.getExternalStorageDirectory().getAbsolutePath();
-            mFilePath += "/SoundRecorder/" + mFileName;
+            mFilePath += "/SlideShow/" + mFileName;
 
             f = new File(mFilePath);
         } while (f.exists() && !f.isDirectory());
     }
 
     public void stopRecording() {
-        mRecorder.stop();
+        if(mRecorder != null){
+            mRecorder.stop();
+            mRecorder.release();
+        }
         mElapsedMillis = (System.currentTimeMillis() - mStartingTimeMillis);
-        mRecorder.release();
         Log.e(LOG_TAG, "stop recording");
         // Toast.makeText(this, " Saved Recordings " + mFilePath, Toast.LENGTH_LONG).show();
 
@@ -140,7 +141,7 @@ public class RecordingService extends Service {
         mRecorder = null;
 
         try {
-              mDatabase.addRecording(mFileName, mFilePath, mElapsedMillis);
+            //  mDatabase.addRecording(mFileName, mFilePath, mElapsedMillis);
 
         } catch (Exception e) {
             Log.e(LOG_TAG, "exception", e);
@@ -152,30 +153,10 @@ public class RecordingService extends Service {
         mIncrementTimerTask = new TimerTask() {
             @Override
             public void run() {
-              /*  mElapsedSeconds++;
-                if (onTimerChangedListener != null)
-                    onTimerChangedListener.onTimerChanged(mElapsedSeconds);
-                NotificationManager mgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);*/
-                //  mgr.notify(1, createNotification());
                 stopRecording();
                 startRecording();
             }
         };
         mTimer.scheduleAtFixedRate(mIncrementTimerTask, 30*60*1000, 1000);
     }
-
-  /*  //TODO:
-    private Notification createNotification() {
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(getApplicationContext())
-                        .setSmallIcon(R.drawable.ic_mic_white_36dp)
-                        .setContentTitle(getString(R.string.notification_recording))
-                        .setContentText(mTimerFormat.format(mElapsedSeconds * 1000))
-                        .setOngoing(true);
-
-        mBuilder.setContentIntent(PendingIntent.getActivities(getApplicationContext(), 0,
-                new Intent[]{new Intent(getApplicationContext(), MainActivity.class)}, 0));
-
-        return mBuilder.build();
-    }*/
 }
