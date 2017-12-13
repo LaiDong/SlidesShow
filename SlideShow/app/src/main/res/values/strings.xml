@@ -13,7 +13,7 @@
 
     <!--ShowPhoto-->
     <string name="photo_slide_show">Start slide show</string>
-
+    <string name="photo_slide_show_end">End of slide show</string>
 
     <!--PhotoSelect-->
     <string name="select_title">Select Photo</string>

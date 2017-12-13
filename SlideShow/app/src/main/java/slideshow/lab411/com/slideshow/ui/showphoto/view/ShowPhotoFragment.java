@@ -121,6 +121,7 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
     void setupView() {
         if (mAdapter == null)
             mAdapter = new ShowPhotoAdapter(mPhotoInfoList);
+        mPhotoPager.setPageTransformer(true, new DepthPageTransformer());
         mPhotoPager.setAdapter(mAdapter);
         mPhotoPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             boolean isFirst = true;
@@ -177,40 +178,49 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
             mSlideShowItem.setIcon(R.drawable.ic_stop);
             mTimer = new Timer();
 //            mTimer.schedule(mSlideShowTask, 2000, 2000);
-            mTimer.scheduleAtFixedRate(mSlideShowTask, 2 * 1000, 2000);
+            mSlideShowTask = new SlideShowTask();
+            mTimer.schedule(mSlideShowTask, 2 * 1000, 2000);
         }
     }
 
+    class SlideShowTask extends TimerTask {
+        @Override
+        public void run() {
+            getParentActivity().runOnUiThread(new TimerTask() {
+                @Override
+                public void run() {
+                    if (mAdapter != null) {
+                        int count = mAdapter.getCount();
+                        if (count > 0) {
+                            int currentPosition = mPhotoPager.getCurrentItem();
+                            if (currentPosition < count - 1) {
+                                currentPosition++;
+                                mPhotoPager.setCurrentItem(currentPosition);
+                            } else {
+                                cancel();
+                                if (mTimer != null) {
+                                    mTimer.cancel();
+                                    mTimer = null;
+                                    showMessage(R.string.photo_slide_show_end);
+                                }
+                            }
 
-TimerTask mSlideShowTask = new TimerTask() {
-    @Override
-    public void run() {
-        getParentActivity().runOnUiThread(new TimerTask() {
-            @Override
-            public void run() {
-                if (mAdapter != null) {
-                    int count = mAdapter.getCount();
-                    if (count > 0) {
-                        int currentPosition = mPhotoPager.getCurrentItem();
-                        if (currentPosition < count - 1) {
-                            currentPosition++;
-                        } else {
-                            currentPosition = 0;
+
                         }
-                        mPhotoPager.setCurrentItem(currentPosition);
                     }
                 }
-            }
-        });
-
+            });
+        }
     }
-};
+
+    TimerTask mSlideShowTask = null;
+
     @Override
     public void stopSlideShow() {
-        if (mSlideShowTask != null) {
+        if (mTimer != null) {
             mSlideShowItem.setIcon(R.drawable.ic_slideshow_dark);
-            mSlideShowTask.cancel();
-            mSlideShowTask = null;
+            mTimer.cancel();
+            mTimer = null;
         }
     }
 
@@ -270,7 +280,7 @@ TimerTask mSlideShowTask = new TimerTask() {
                 getParentActivity().onBackPressed();
                 return true;
             case R.id.action_slide:
-                if (mSlideShowTask != null) {
+                if (mTimer != null) {
                     stopSlideShow();
                     onRecord(false);
                 } else {
@@ -293,6 +303,43 @@ TimerTask mSlideShowTask = new TimerTask() {
             getActivity().startService(intent);
         } else {
             getActivity().stopService(intent);
+        }
+    }
+
+    public class DepthPageTransformer implements ViewPager.PageTransformer {
+        private static final float MIN_SCALE = 0.75f;
+
+        public void transformPage(View view, float position) {
+            int pageWidth = view.getWidth();
+
+            if (position < -1) { // [-Infinity,-1)
+                // This page is way off-screen to the left.
+                view.setAlpha(0);
+
+            } else if (position <= 0) { // [-1,0]
+                // Use the default slide transition when moving to the left page
+                view.setAlpha(1);
+                view.setTranslationX(0);
+                view.setScaleX(1);
+                view.setScaleY(1);
+
+            } else if (position <= 1) { // (0,1]
+                // Fade the page out.
+                view.setAlpha(1 - position);
+
+                // Counteract the default slide transition
+                view.setTranslationX(pageWidth * -position);
+
+                // Scale the page down (between MIN_SCALE and 1)
+                float scaleFactor = MIN_SCALE
+                        + (1 - MIN_SCALE) * (1 - Math.abs(position));
+                view.setScaleX(scaleFactor);
+                view.setScaleY(scaleFactor);
+
+            } else { // (1,+Infinity]
+                // This page is way off-screen to the right.
+                view.setAlpha(0);
+            }
         }
     }
 }
