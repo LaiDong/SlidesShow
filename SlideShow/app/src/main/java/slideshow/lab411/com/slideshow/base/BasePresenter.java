@@ -1,5 +1,7 @@
 package slideshow.lab411.com.slideshow.base;
 
+import android.content.Context;
+
 /**
  * Created by PL_itto on 11/22/2017.
  */
@@ -14,7 +16,6 @@ public class BasePresenter<V extends IBaseView> implements IBasePresenter<V> {
 //    public BasePresenter(IDataManager dataManager) {
 //        mDataManager = dataManager;
 //    }
-
 
     @Override
     public void onAttach(V view) {

@@ -201,6 +201,9 @@ public class ShowPhotoFragment extends BaseFragment implements IShowPhotoView {
                                 if (mTimer != null) {
                                     mTimer.cancel();
                                     mTimer = null;
+                                    if (mSlideShowItem != null) {
+                                        mSlideShowItem.setIcon(R.drawable.ic_slideshow_dark);
+                                    }
                                     showMessage(R.string.photo_slide_show_end);
                                 }
                             }

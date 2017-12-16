@@ -26,10 +26,18 @@ public interface IPhotoGridContract {
         void openGallery();
 
         void openSlideShow();
+
+        void deleteSelectedPhoto();
     }
 
     interface IPhotoGridPresenter<V extends IPhotoGridView> extends IBasePresenter<V> {
         void initDefaultPhoto();
+
+        void loadPhoto(Context context);
+
+        void savedAddedPhotos(List<PhotoInfo> data, Context context,boolean clearOldData);
+
+        void deleteAllPhoto(Context context);
     }
 
 }
