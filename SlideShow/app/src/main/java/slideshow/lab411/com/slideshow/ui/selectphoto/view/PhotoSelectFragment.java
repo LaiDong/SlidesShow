@@ -251,22 +251,21 @@ public class PhotoSelectFragment extends BaseFragment implements IPhotoSelectVie
         }
 
         void initViewType() {
-            mItemTypes = new int[mAlbumList.getPhotoCount() + mAlbumList.getPhotoCount()];
+            mItemTypes = new int[mAlbumList.getPhotoCount() + mAlbumList.getAlbumCount()];
             List<PhotoFolderInfo> list = mAlbumList.getAlbumList();
             int currentPos = 0;
             if (mItemTypes.length == 0)
                 return;
-            mItemTypes[currentPos] = TYPE_HEADER;
             for (PhotoFolderInfo info : list) {
                 mDataList.put(currentPos, info.getFolderName());
+                mItemTypes[currentPos] = TYPE_HEADER;
                 for (int i = 0; i < info.getPhotoCount(); i++) {
                     PhotoInfo photoInfo = info.getPhoto(i);
                     currentPos++;
                     mDataList.put(currentPos, photoInfo);
                 }
-                if (++currentPos < mAlbumList.getPhotoCount()) {
-                    mItemTypes[currentPos] = TYPE_HEADER;
-                    mDataList.put(currentPos, info.getFolderName());
+                if (++currentPos >= mItemTypes.length) {
+                    return;
                 }
             }
         }
@@ -279,8 +278,8 @@ public class PhotoSelectFragment extends BaseFragment implements IPhotoSelectVie
             SparseArray<PhotoInfo> data = mAdapter.getSelectedPhoto();
             if (data != null && data.size() > 0) {
 
-                List<PhotoInfo> result=new ArrayList<>();
-                for(int i=0;i<data.size();i++){
+                List<PhotoInfo> result = new ArrayList<>();
+                for (int i = 0; i < data.size(); i++) {
                     result.add(data.valueAt(i));
                 }
                 Intent intent = new Intent();
